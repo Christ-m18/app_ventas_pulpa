@@ -1,26 +1,296 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════════════════════
+   D'RICHARD AL NATURAL · CITRUS DESIGN SYSTEM
+   Cream-warm light first · Vibrant Mandarin/Lemon/Lime/Grapefruit
+   ═══════════════════════════════════════════════════════════════ */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-heading);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Brand fruit accents (matched to the D'Richard logo) */
+  --color-brand-mandarin: var(--brand-mandarin);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-lemon: var(--brand-lemon);
+  --color-brand-lime: var(--brand-lime);
+  --color-brand-grapefruit: var(--brand-grapefruit);
+  --color-brand-mango: var(--brand-orange);  /* alias for previously-used token */
+  --color-brand-mora: var(--brand-grapefruit);
+  --color-brand-maracuya: var(--brand-lemon);
+
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-glass-hover: var(--glass-hover);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── LIGHT MODE (DEFAULT — WARM CREAM) ────────────────────── */
+
+:root {
+  /* Surfaces — warm cream evokes natural fruit / juice bar */
+  --background: oklch(0.985 0.014 75);
+  --foreground: oklch(0.20 0.025 35);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.20 0.025 35);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.20 0.025 35);
+
+  /* Primary — Mandarin orange (the logo's dominant color) */
+  --primary: oklch(0.68 0.20 47);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.96 0.04 80);
+  --secondary-foreground: oklch(0.22 0.025 35);
+
+  --muted: oklch(0.95 0.014 75);
+  --muted-foreground: oklch(0.50 0.025 50);
+
+  --accent: oklch(0.93 0.10 95);              /* pale lemon */
+  --accent-foreground: oklch(0.22 0.025 35);
+
+  --destructive: oklch(0.62 0.24 22);
+
+  --border: oklch(0.20 0.02 40 / 10%);
+  --input: oklch(0.20 0.02 40 / 8%);
+  --ring: oklch(0.68 0.20 47);
+
+  --chart-1: oklch(0.72 0.20 50);             /* mandarin */
+  --chart-2: oklch(0.82 0.18 90);             /* lemon */
+  --chart-3: oklch(0.74 0.22 130);            /* lime */
+  --chart-4: oklch(0.68 0.20 18);             /* grapefruit */
+  --chart-5: oklch(0.55 0.18 280);            /* berry accent */
+
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.97 0.012 75);
+  --sidebar-foreground: oklch(0.20 0.025 35);
+  --sidebar-primary: oklch(0.68 0.20 47);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.93 0.04 80);
+  --sidebar-accent-foreground: oklch(0.22 0.025 35);
+  --sidebar-border: oklch(0.20 0.02 40 / 10%);
+  --sidebar-ring: oklch(0.68 0.20 47);
+
+  /* Brand citrus palette — exactly the logo */
+  --brand-orange: oklch(0.70 0.21 47);
+  --brand-mandarin: oklch(0.76 0.18 60);
+  --brand-lemon: oklch(0.86 0.18 95);
+  --brand-lime: oklch(0.78 0.22 130);
+  --brand-grapefruit: oklch(0.66 0.21 18);
+
+  /* Glass — frosted citrus look */
+  --glass-bg: oklch(1 0 0 / 70%);
+  --glass-border: oklch(0.20 0.02 40 / 10%);
+  --glass-hover: oklch(1 0 0 / 85%);
+}
+
+/* ─── DARK MODE (ALTERNATE — WARM COCOA) ───────────────────── */
+
+.dark {
+  --background: oklch(0.16 0.022 35);
+  --foreground: oklch(0.96 0.014 75);
+  --card: oklch(0.20 0.022 35);
+  --card-foreground: oklch(0.96 0.014 75);
+  --popover: oklch(0.20 0.022 35);
+  --popover-foreground: oklch(0.96 0.014 75);
+
+  --primary: oklch(0.74 0.21 52);             /* slightly brighter orange to pop on dark */
+  --primary-foreground: oklch(0.16 0.022 35);
+
+  --secondary: oklch(0.26 0.04 50);
+  --secondary-foreground: oklch(0.96 0.014 75);
+
+  --muted: oklch(0.24 0.018 40);
+  --muted-foreground: oklch(0.70 0.018 60);
+
+  --accent: oklch(0.30 0.06 70);
+  --accent-foreground: oklch(0.96 0.014 75);
+
+  --destructive: oklch(0.65 0.24 22);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.74 0.21 52);
+
+  --sidebar: oklch(0.18 0.022 35);
+  --sidebar-foreground: oklch(0.96 0.014 75);
+  --sidebar-primary: oklch(0.74 0.21 52);
+  --sidebar-primary-foreground: oklch(0.16 0.022 35);
+  --sidebar-accent: oklch(0.26 0.04 50);
+  --sidebar-accent-foreground: oklch(0.96 0.014 75);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.74 0.21 52);
+
+  --brand-orange: oklch(0.74 0.22 47);
+  --brand-mandarin: oklch(0.80 0.18 60);
+  --brand-lemon: oklch(0.88 0.18 95);
+  --brand-lime: oklch(0.80 0.22 130);
+  --brand-grapefruit: oklch(0.70 0.22 18);
+
+  --glass-bg: oklch(1 0 0 / 6%);
+  --glass-border: oklch(1 0 0 / 10%);
+  --glass-hover: oklch(1 0 0 / 10%);
+}
+
+/* ─── BASE LAYER ────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+  }
+
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading), var(--font-sans), system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── UTILITIES ─────────────────────────────────────────────── */
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+
+  /* Frosted glass — works in both light and dark */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  }
+
+  .glass-hover:hover {
+    background: var(--glass-hover);
+  }
+
+  /* Citrus glow — orange primary */
+  .glow-primary {
+    box-shadow:
+      0 0 24px oklch(0.70 0.21 47 / 28%),
+      0 0 60px oklch(0.70 0.21 47 / 14%);
+  }
+
+  .glow-mandarin {
+    box-shadow:
+      0 0 24px oklch(0.76 0.18 60 / 30%),
+      0 0 60px oklch(0.76 0.18 60 / 14%);
+  }
+
+  .glow-lemon {
+    box-shadow:
+      0 0 24px oklch(0.86 0.18 95 / 35%),
+      0 0 60px oklch(0.86 0.18 95 / 18%);
+  }
+
+  /* Citrus splash gradient — matches logo background */
+  .bg-citrus-splash {
+    background-image:
+      radial-gradient(ellipse 70% 50% at 30% 10%, oklch(0.86 0.18 95 / 35%), transparent),
+      radial-gradient(ellipse 60% 40% at 90% 30%, oklch(0.70 0.21 47 / 28%), transparent),
+      radial-gradient(ellipse 70% 60% at 60% 90%, oklch(0.78 0.22 130 / 22%), transparent),
+      radial-gradient(ellipse 50% 60% at 20% 80%, oklch(0.66 0.21 18 / 22%), transparent);
+  }
+
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .transition-luxury {
+    transition-property: transform, opacity, box-shadow, background-color, border-color, color;
+    transition-duration: 280ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Brand wordmark — used by header. Splits into two lines visually. */
+  .brand-wordmark {
+    font-family: var(--font-heading), var(--font-sans), system-ui, sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
 }

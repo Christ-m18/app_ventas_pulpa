@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(shop)/layout,_N_T_/(shop)/tienda/layout,_N_T_/(shop)/tienda/page,_N_T_/tienda"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHNob3Ap/tienda/__PAGE__",
+    "/!KHNob3Ap/tienda",
+    "/!KHNob3Ap",
+    "/_index",
+    "/_head"
+  ]
+}

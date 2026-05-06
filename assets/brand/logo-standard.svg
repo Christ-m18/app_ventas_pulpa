@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#fdba74"/>
+      <stop offset="40%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </radialGradient>
+    <radialGradient id="splash" cx="30%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#facc15" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lime" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#bef264"/>
+      <stop offset="100%" stop-color="#65a30d"/>
+    </linearGradient>
+    <linearGradient id="grapefruit" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fda4af"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#splash)"/>
+
+  <!-- Concentric splash ring -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#fff7ed" stroke-opacity="0.18" stroke-width="3"/>
+
+  <!-- Mandarin orange (left, large) -->
+  <circle cx="180" cy="290" r="86" fill="#fb923c"/>
+  <circle cx="180" cy="290" r="86" fill="none" stroke="#7c2d12" stroke-opacity="0.18" stroke-width="3"/>
+  <ellipse cx="158" cy="262" rx="18" ry="10" fill="#fed7aa" opacity="0.7"/>
+  <!-- Mandarin leaf -->
+  <path d="M 200 215 Q 235 195 255 215 Q 235 235 200 235 Z" fill="url(#lime)"/>
+  <path d="M 205 220 Q 230 215 248 220" fill="none" stroke="#365314" stroke-width="2" stroke-opacity="0.4" stroke-linecap="round"/>
+
+  <!-- Lemon slice (top right) -->
+  <circle cx="345" cy="200" r="62" fill="#fef08a"/>
+  <circle cx="345" cy="200" r="62" fill="none" stroke="#854d0e" stroke-opacity="0.20" stroke-width="3"/>
+  <circle cx="345" cy="200" r="48" fill="#fde047"/>
+  <g stroke="#fef9c3" stroke-width="2" opacity="0.6">
+    <line x1="345" y1="155" x2="345" y2="245"/>
+    <line x1="300" y1="200" x2="390" y2="200"/>
+    <line x1="313" y1="168" x2="377" y2="232"/>
+    <line x1="377" y1="168" x2="313" y2="232"/>
+  </g>
+
+  <!-- Grapefruit slice (bottom right) -->
+  <circle cx="365" cy="365" r="55" fill="url(#grapefruit)"/>
+  <circle cx="365" cy="365" r="55" fill="none" stroke="#7f1d1d" stroke-opacity="0.18" stroke-width="3"/>
+  <g stroke="#fff1f2" stroke-width="2" opacity="0.55">
+    <line x1="365" y1="320" x2="365" y2="410"/>
+    <line x1="320" y1="365" x2="410" y2="365"/>
+  </g>
+
+  <!-- Lime wedge (bottom left) -->
+  <circle cx="120" cy="395" r="40" fill="url(#lime)"/>
+  <circle cx="120" cy="395" r="40" fill="none" stroke="#3f6212" stroke-opacity="0.20" stroke-width="3"/>
+
+  <!-- Juice droplets -->
+  <circle cx="78" cy="160" r="10" fill="#fff7ed" opacity="0.9"/>
+  <circle cx="60" cy="190" r="6" fill="#fff7ed" opacity="0.7"/>
+  <circle cx="430" cy="430" r="8" fill="#fff7ed" opacity="0.85"/>
+  <circle cx="450" cy="105" r="6" fill="#fff7ed" opacity="0.8"/>
+</svg>

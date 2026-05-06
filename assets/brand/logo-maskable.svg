@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#fdba74"/>
+      <stop offset="55%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </radialGradient>
+    <linearGradient id="lime" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#bef264"/>
+      <stop offset="100%" stop-color="#65a30d"/>
+    </linearGradient>
+    <linearGradient id="grapefruit" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fda4af"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Mark scaled to 0.7 inside maskable safe zone -->
+  <g transform="translate(256 260) scale(0.7)">
+    <!-- Mandarin -->
+    <circle cx="-85" cy="20" r="100" fill="#fb923c"/>
+    <circle cx="-85" cy="20" r="100" fill="none" stroke="#7c2d12" stroke-opacity="0.2" stroke-width="3"/>
+    <ellipse cx="-110" cy="-12" rx="22" ry="12" fill="#fed7aa" opacity="0.7"/>
+    <path d="M -60 -62 Q -22 -85 0 -62 Q -22 -38 -60 -38 Z" fill="url(#lime)"/>
+
+    <!-- Lemon -->
+    <circle cx="105" cy="-70" r="72" fill="#fef08a"/>
+    <circle cx="105" cy="-70" r="72" fill="none" stroke="#854d0e" stroke-opacity="0.20" stroke-width="3"/>
+    <circle cx="105" cy="-70" r="55" fill="#fde047"/>
+    <g stroke="#fef9c3" stroke-width="2.5" opacity="0.65">
+      <line x1="105" y1="-122" x2="105" y2="-18"/>
+      <line x1="53" y1="-70" x2="157" y2="-70"/>
+    </g>
+
+    <!-- Grapefruit -->
+    <circle cx="120" cy="100" r="62" fill="url(#grapefruit)"/>
+    <circle cx="120" cy="100" r="62" fill="none" stroke="#7f1d1d" stroke-opacity="0.20" stroke-width="3"/>
+    <g stroke="#fff1f2" stroke-width="2.5" opacity="0.55">
+      <line x1="120" y1="46" x2="120" y2="154"/>
+      <line x1="66" y1="100" x2="174" y2="100"/>
+    </g>
+  </g>
+</svg>
