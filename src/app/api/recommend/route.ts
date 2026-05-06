@@ -11,16 +11,16 @@ export async function POST(req: Request) {
     const products = await productService.getProducts();
 
     let text = "";
-    let lastError: any = null;
+    let lastError: unknown = null;
     const MAX_RETRIES = 3;
     const BASE_DELAY_MS = 1500;
 
-    // Modelos gratuitos con cuota activa según tu consola de Google AI Studio
+    // Modelos gratuitos verificados en Google AI Studio (mayo 2026)
+    // Orden: más capaz → más rápido/económico
     const fallbackModels = [
-      "gemini-2.5-flash",
-      "gemini-3-flash",
-      "gemini-3.1-flash-lite",
-      "gemini-2.5-flash-lite"
+      "gemini-2.5-flash",       // Estable y confiable
+      "gemini-3-flash",         // Rápido e inteligente
+      "gemini-3.1-flash-lite",  // Ultra-rápido, bajo costo
     ];
 
     const systemInstruction = `Eres Valeria, tu experta agente nutricional y especialista en jugos naturales para "${BRAND.name}".
@@ -59,8 +59,8 @@ No añadas texto adicional fuera del JSON.`;
           console.log(`[AI Assistant] Éxito usando ${modelName} en el intento ${attempt}`);
           success = true;
           break; // Stop fallback loop if successful
-        } catch (err: any) {
-          console.warn(`[AI Assistant] Falló ${modelName} (Intento ${attempt}):`, err?.message || err);
+        } catch (err: unknown) {
+          console.warn(`[AI Assistant] Falló ${modelName} (Intento ${attempt}):`, err instanceof Error ? err.message : err);
           lastError = err;
         }
       }
@@ -89,14 +89,14 @@ No añadas texto adicional fuera del JSON.`;
     try {
       const parsedData = JSON.parse(cleanText);
       return NextResponse.json(parsedData);
-    } catch (parseError) {
+    } catch {
       console.error("[AI Assistant] Error parseando JSON:", cleanText);
       throw new Error("La IA no devolvió un formato válido.");
     }
-  } catch (error: any) {
-    console.error("Gemini Error:", error?.message || error);
+  } catch (error: unknown) {
+    console.error("Gemini Error:", error instanceof Error ? error.message : error);
     return NextResponse.json(
-      { error: "Failed to generate recommendation", details: error?.message || "Unknown error" }, 
+      { error: "Failed to generate recommendation", details: error instanceof Error ? error.message : "Unknown error" }, 
       { status: 500 }
     );
   }
