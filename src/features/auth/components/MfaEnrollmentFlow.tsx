@@ -1,6 +1,6 @@
 "use client";
+// Force recompile: 1.6
 
-import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,21 +64,37 @@ export function MfaEnrollmentFlow() {
 
   async function startEnrollment() {
     setBusy(true);
-    const { data, error } = await supabase.auth.mfa.enroll({
-      factorType: "totp",
-      friendlyName: `Authenticator ${new Date().toISOString().slice(0, 10)}`,
-    });
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      // 1. Limpieza automática de factores no verificados para evitar errores 422 y clutter
+      const { data: currentFactors } = await supabase.auth.mfa.listFactors();
+      const unverifiedFactors = (currentFactors?.totp as unknown as Factor[] | undefined)?.filter(f => f.status === "unverified") || [];
+      
+      for (const factor of unverifiedFactors) {
+        await supabase.auth.mfa.unenroll({ factorId: factor.id });
+      }
+
+      // 2. Iniciar nuevo enrolamiento con nombre único
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: "totp",
+        friendlyName: `Authenticator ${new Date().toLocaleString()}`,
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      setEnroll({
+        factorId: data.id,
+        qrCode: data.totp.qr_code,
+        secret: data.totp.secret,
+      });
+      setTimeout(() => setFocus("code"), 50);
+    } catch {
+      toast.error("Error al iniciar el proceso de seguridad");
+    } finally {
+      setBusy(false);
     }
-    setEnroll({
-      factorId: data.id,
-      qrCode: data.totp.qr_code,
-      secret: data.totp.secret,
-    });
-    setTimeout(() => setFocus("code"), 50);
   }
 
   async function cancelEnrollment() {
@@ -201,12 +217,10 @@ export function MfaEnrollmentFlow() {
 
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             <div className="rounded-2xl bg-white p-3 shadow-lg shadow-primary/10">
-              <Image
+              <img
                 src={enroll.qrCode}
                 alt="Código QR de autenticación"
-                width={192}
-                height={192}
-                unoptimized
+                className="h-48 w-48"
               />
             </div>
             <div className="flex-1 space-y-3">

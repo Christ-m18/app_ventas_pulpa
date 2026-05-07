@@ -1,6 +1,6 @@
 import "server-only";
 
-import { ADMIN_AVAILABLE, createSupabaseAdminClient } from "@/infrastructure/supabase/admin";
+import { isAdminAvailable, createSupabaseAdminClient } from "@/infrastructure/supabase/admin";
 import type { OrderStatus } from "../../../../packages/core/domain/entities/order";
 import type { AdminOrderDetail, AdminOrderListItem } from "./types";
 
@@ -15,7 +15,7 @@ type ListFilters = {
 };
 
 function admin() {
-  if (!ADMIN_AVAILABLE) throw new Error("ADMIN_DISABLED");
+  if (!isAdminAvailable()) throw new Error("ADMIN_DISABLED");
   return createSupabaseAdminClient();
 }
 

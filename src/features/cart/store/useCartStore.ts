@@ -55,9 +55,9 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "cart-storage-v2",
-      merge: (persistedState: any, currentState) => ({
+      merge: (persistedState: unknown, currentState) => ({
         ...currentState,
-        items: persistedState?.items || [],
+        items: (persistedState as { items?: CartItem[] })?.items || [],
         hydrated: true,
       }),
       onRehydrateStorage: () => (state) => {

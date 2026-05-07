@@ -1,15 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AtSign } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 
 export function BrandFooter() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
   return (
     <footer className="border-t border-border/60 bg-muted/40 px-4 py-5 md:py-6">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
         <p className="text-xs leading-relaxed text-muted-foreground md:flex-1">
-          <span className="font-semibold text-foreground">{BRAND.name}.</span>{" "}
-          Promociones y disponibilidad actualizada en nuestro Instagram. Contáctanos por WhatsApp para descuentos al por mayor.
+          {mounted ? (
+            <>
+              <span className="font-semibold text-foreground">{BRAND.name}.</span>{" "}
+              Promociones y disponibilidad actualizada en nuestro Instagram. Contáctanos por WhatsApp para descuentos al por mayor.
+            </>
+          ) : (
+            // Empty on server to avoid any extension interference during hydration
+            <span className="opacity-0">.</span>
+          )}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 md:shrink-0">
           <a

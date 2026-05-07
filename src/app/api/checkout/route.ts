@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DELIVERY_ZONES } from "@/../packages/core/domain/entities/order";
 import { checkoutPayloadSchema } from "@/features/checkout/schemas";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server";
-import { createSupabaseAdminClient, ADMIN_AVAILABLE } from "@/infrastructure/supabase/admin";
+import { createSupabaseAdminClient, isAdminAvailable } from "@/infrastructure/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     const isCash = payload.paymentMethod === "cash_on_delivery";
     const initialPaymentStatus = isCash ? "pending_cash" : "awaiting_voucher";
 
-    if (!ADMIN_AVAILABLE) {
+    if (!isAdminAvailable()) {
       return NextResponse.json(
         { error: "Configuración del servidor incompleta (SERVICE_ROLE_KEY)" },
         { status: 503 },

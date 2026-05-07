@@ -72,6 +72,8 @@ export function VoucherUploader({ orderId }: Props) {
       setResult(json as Result);
       if ((json as Result).is_verified) {
         toast.success("Pago verificado");
+      } else if ((json as Result).warnings.includes("no_es_comprobante")) {
+        toast.error("La imagen no parece ser un comprobante, pasará a revisión manual.");
       } else {
         toast.info("Recibimos tu comprobante. Lo revisaremos en breve.");
       }
@@ -84,28 +86,53 @@ export function VoucherUploader({ orderId }: Props) {
   }
 
   if (result) {
+    const isInvalidVoucher = result.warnings.includes("no_es_comprobante");
+    const amountMismatch = result.warnings.includes("monto_no_coincide");
+    // const isLowConfidence = !result.is_verified && !isInvalidVoucher && !amountMismatch;
+
     return (
       <div
         className={cn(
           "rounded-2xl border p-5 text-sm",
           result.is_verified
             ? "border-brand-lime/40 bg-brand-lime/10 text-foreground"
-            : "border-amber-500/40 bg-amber-500/10 text-foreground",
+            : isInvalidVoucher
+              ? "border-red-500/40 bg-red-500/10 text-foreground"
+              : "border-amber-500/40 bg-amber-500/10 text-foreground",
         )}
       >
-        <div className="mb-3 flex items-center gap-3">
+        <div className="mb-3 flex items-start gap-3">
           {result.is_verified ? (
-            <CheckCircle2 className="h-6 w-6 text-brand-lime" aria-hidden />
+            <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-brand-lime" aria-hidden />
           ) : (
-            <ShieldAlert className="h-6 w-6 text-amber-500" aria-hidden />
+            <ShieldAlert 
+              className={cn("mt-0.5 h-6 w-6 shrink-0", isInvalidVoucher ? "text-red-500" : "text-amber-500")} 
+              aria-hidden 
+            />
           )}
-          <p className="text-base font-bold">
-            {result.is_verified
-              ? "Pago verificado automáticamente"
-              : "Comprobante recibido — en revisión"}
-          </p>
+          <div>
+            <p className="text-base font-bold">
+              {result.is_verified
+                ? "Pago verificado automáticamente"
+                : isInvalidVoucher
+                  ? "Imagen no reconocida como comprobante"
+                  : amountMismatch
+                    ? "Monto no coincide"
+                    : "Comprobante en revisión manual"}
+            </p>
+            {!result.is_verified && (
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                {isInvalidVoucher
+                  ? "Nuestra IA ha determinado que la imagen no corresponde a un comprobante bancario válido. "
+                  : amountMismatch
+                    ? "Nuestra IA detectó un comprobante, pero el monto transferido parece no coincidir con el total de la orden. "
+                    : "La imagen no fue lo suficientemente clara para una verificación automática. "}
+                Sin embargo, no te preocupes: <strong>un administrador revisará la imagen manualmente</strong>. Si se confirma el pago, el estado de tu orden cambiará y te notificaremos.
+              </p>
+            )}
+          </div>
         </div>
-        <dl className="grid grid-cols-2 gap-2 text-xs">
+        <dl className="mt-4 grid grid-cols-2 gap-2 text-xs border-t border-border pt-4">
           {result.extracted.amount != null && (
             <>
               <dt className="text-muted-foreground">Monto detectado</dt>

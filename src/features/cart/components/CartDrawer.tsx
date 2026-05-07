@@ -116,6 +116,22 @@ export function CartDrawer() {
         </ScrollArea>
 
         {currentItems.length > 0 && (
+          <div className="bg-brand-orange/5 border border-brand-orange/10 rounded-xl p-3 mb-2 mx-1">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider">Ahorro por Volumen</span>
+              <span className="text-xs font-black text-brand-orange">
+                {subtotal >= 20000 ? "15%" : subtotal >= 10000 ? "10%" : subtotal >= 5000 ? "5%" : "0%"}
+              </span>
+            </div>
+            {subtotal < 20000 && (
+              <p className="text-[11px] text-muted-foreground">
+                Agrega <span className="font-bold text-foreground">RD${((subtotal < 5000 ? 5000 : subtotal < 10000 ? 10000 : 20000) - subtotal).toFixed(2)}</span> más para obtener el próximo nivel de descuento.
+              </p>
+            )}
+          </div>
+        )}
+
+        {currentItems.length > 0 && (
           <SheetFooter className="flex-col gap-4">
             <div className="w-full border-t pt-4 flex flex-col gap-2">
               {discount > 0 && (

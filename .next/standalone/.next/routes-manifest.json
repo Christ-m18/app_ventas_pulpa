@@ -214,18 +214,6 @@
       "namedRegex": "^/offline(?:/)?$"
     },
     {
-      "page": "/perfil",
-      "regex": "^/perfil(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/perfil(?:/)?$"
-    },
-    {
-      "page": "/profile",
-      "regex": "^/profile(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/profile(?:/)?$"
-    },
-    {
       "page": "/registro",
       "regex": "^/registro(?:/)?$",
       "routeKeys": {},

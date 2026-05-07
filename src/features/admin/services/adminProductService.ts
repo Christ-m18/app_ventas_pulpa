@@ -1,10 +1,10 @@
 import "server-only";
 
-import { ADMIN_AVAILABLE, createSupabaseAdminClient } from "@/infrastructure/supabase/admin";
+import { isAdminAvailable, createSupabaseAdminClient } from "@/infrastructure/supabase/admin";
 import type { AdminInventoryLog, AdminProductRow } from "./types";
 
 function admin() {
-  if (!ADMIN_AVAILABLE) throw new Error("ADMIN_DISABLED");
+  if (!isAdminAvailable()) throw new Error("ADMIN_DISABLED");
   return createSupabaseAdminClient();
 }
 

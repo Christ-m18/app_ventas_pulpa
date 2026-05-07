@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server";
-import { createSupabaseAdminClient, ADMIN_AVAILABLE } from "@/infrastructure/supabase/admin";
+import { createSupabaseAdminClient, isAdminAvailable } from "@/infrastructure/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -19,7 +19,7 @@ const cartSyncSchema = z.object({
 // GET — return the current user's cart_items rows.
 export async function GET() {
   try {
-    if (!ADMIN_AVAILABLE) return NextResponse.json({ items: [] });
+    if (!isAdminAvailable()) return NextResponse.json({ items: [] });
 
     const supabase = await createSupabaseServerClient();
     const {
@@ -45,7 +45,7 @@ export async function GET() {
 // PUT — replace the current user's cart with the given items (idempotent sync).
 export async function PUT(req: Request) {
   try {
-    if (!ADMIN_AVAILABLE) {
+    if (!isAdminAvailable()) {
       return NextResponse.json(
         { error: "Configuración del servidor incompleta" },
         { status: 503 },

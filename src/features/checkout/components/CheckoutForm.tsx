@@ -1,4 +1,5 @@
 "use client";
+// Force recompile: 1.6
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -11,15 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   DELIVERY_ZONES,
@@ -28,17 +20,18 @@ import {
 } from "../../../../packages/core/domain/entities/order";
 import { checkoutPayloadSchema, type CheckoutPayload } from "../schemas";
 import { cn } from "@/lib/utils";
+import { Search, MapPin, Check, Globe2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 const ZONE_DEFAULT = "distrito-nacional";
-
-// Group zones by region once (module scope) — DELIVERY_ZONES is constant.
-const ZONES_BY_REGION = DELIVERY_ZONES.reduce<Record<DeliveryRegion, typeof DELIVERY_ZONES>>(
-  (acc, z) => {
-    (acc[z.region] ??= []).push(z);
-    return acc;
-  },
-  {} as Record<DeliveryRegion, typeof DELIVERY_ZONES>,
-);
 
 const REGION_ORDER: DeliveryRegion[] = [
   "cibao-central",
@@ -49,12 +42,209 @@ const REGION_ORDER: DeliveryRegion[] = [
   "sur",
 ];
 
+function SmartZoneSelector({ 
+  value, 
+  onChange 
+}: { 
+  value: string; 
+  onChange: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  
+  const selectedZone = DELIVERY_ZONES.find(z => z.id === value);
+  
+  const filteredZones = DELIVERY_ZONES.filter(z => 
+    z.name.toLowerCase().includes(search.toLowerCase()) ||
+    REGION_LABELS[z.region].toLowerCase().includes(search.toLowerCase())
+  );
+
+  const zonesByRegion = filteredZones.reduce<Record<DeliveryRegion, typeof DELIVERY_ZONES>>(
+    (acc, z) => {
+      (acc[z.region] ??= []).push(z);
+      return acc;
+    },
+    {} as Record<DeliveryRegion, typeof DELIVERY_ZONES>,
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger 
+        render={
+          <Button 
+            variant="outline" 
+            role="combobox" 
+            className="w-full justify-between h-12 px-4 bg-background border-border hover:border-brand-orange/50 transition-all rounded-xl shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-brand-orange/10 p-1.5 rounded-lg">
+                <MapPin className="h-4 w-4 text-brand-orange" />
+              </div>
+              <span className={cn(
+                "font-semibold truncate max-w-[150px] sm:max-w-[220px]", 
+                !selectedZone && "text-muted-foreground"
+              )}>
+                {selectedZone ? selectedZone.name : "Selecciona tu provincia..."}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedZone && (
+                <Badge variant="secondary" className="bg-brand-orange/10 text-brand-orange border-transparent">
+                  +RD${selectedZone.cost}
+                </Badge>
+              )}
+              <Globe2 className="h-4 w-4 opacity-50 shrink-0" />
+            </div>
+          </Button>
+        }
+      />
+      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden bg-card border-border shadow-2xl">
+        <DialogHeader className="p-4 border-b bg-muted/30">
+          <DialogTitle className="text-lg font-bold flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-brand-orange" />
+            Zona de Entrega
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="p-4 border-b bg-background">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Escribe tu provincia o ciudad..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-11 bg-muted/50 border-transparent focus:bg-background transition-all"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        <ScrollArea className="h-[400px]">
+          <div className="p-2 space-y-4">
+            {REGION_ORDER.map((region) => {
+              const regionZones = zonesByRegion[region];
+              if (!regionZones?.length) return null;
+              
+              return (
+                <div key={region} className="space-y-1">
+                  <h4 className="px-3 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange/80 bg-brand-orange/5 rounded-md mb-1">
+                    {REGION_LABELS[region]}
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1">
+                    {regionZones.map((z) => {
+                      const isActive = value === z.id;
+                      return (
+                        <button
+                          key={z.id}
+                          onClick={() => {
+                            onChange(z.id);
+                            setOpen(false);
+                            setSearch("");
+                          }}
+                          className={cn(
+                            "group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all text-left",
+                            isActive 
+                              ? "bg-brand-orange text-white shadow-md shadow-brand-orange/20" 
+                              : "hover:bg-brand-orange/10 text-foreground"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "h-2 w-2 rounded-full transition-all shrink-0",
+                              isActive ? "bg-white scale-125" : "bg-muted-foreground/30 group-hover:bg-brand-orange"
+                            )} />
+                            <span className="font-semibold truncate pr-2">{z.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              "text-xs font-bold",
+                              isActive ? "text-white/90" : "text-muted-foreground"
+                            )}>
+                              +RD${z.cost}
+                            </span>
+                            {isActive && <Check className="h-4 w-4 text-white" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            
+            {filteredZones.length === 0 && (
+              <div className="py-12 text-center space-y-2">
+                <Globe2 className="h-12 w-12 text-muted-foreground/20 mx-auto" />
+                <p className="text-sm text-muted-foreground font-medium">No encontramos esa zona.</p>
+                <p className="text-xs text-muted-foreground/60">Prueba con otro nombre o provincia.</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+        
+        <div className="p-3 border-t bg-muted/20 text-center">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+            Cobertura Nacional Garantizada
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DiscountProgress({ subtotal }: { subtotal: number }) {
+  const nextTier = subtotal < 5000 ? 5000 : subtotal < 10000 ? 10000 : subtotal < 20000 ? 20000 : null;
+  const currentDiscount = subtotal < 5000 ? 0 : subtotal < 10000 ? 5 : subtotal < 20000 ? 10 : 15;
+  
+  return (
+    <div className="rounded-xl bg-brand-orange/5 p-4 border border-brand-orange/10 space-y-3 mb-4">
+      <div className="flex justify-between items-center">
+        <span className="text-[10px] font-bold text-brand-orange uppercase tracking-widest">Plan de Ahorro</span>
+        <span className="text-xs font-black text-brand-orange bg-brand-orange/10 px-2 py-0.5 rounded-full">
+          {currentDiscount}% OFF
+        </span>
+      </div>
+      
+      {nextTier && (
+        <p className="text-[11px] text-muted-foreground leading-snug">
+          ¡Faltan <span className="font-bold text-foreground underline decoration-brand-orange/30">RD${(nextTier - subtotal).toFixed(2)}</span> para obtener un <span className="font-bold text-brand-orange">{currentDiscount === 0 ? 5 : currentDiscount === 5 ? 10 : 15}%</span> de descuento!
+        </p>
+      )}
+
+      <div className="flex gap-1.5 overflow-hidden">
+        {[
+          { label: "5k", discount: "5%", min: 5000 },
+          { label: "10k", discount: "10%", min: 10000 },
+          { label: "20k", discount: "15%", min: 20000 },
+        ].map((tier) => {
+          const isActive = subtotal >= tier.min;
+          return (
+            <div 
+              key={tier.label}
+              className={cn(
+                "flex-1 flex flex-col items-center py-2 px-1 rounded-lg border transition-all duration-300",
+                isActive 
+                  ? "bg-brand-orange border-transparent shadow-sm shadow-brand-orange/20 scale-[1.02]" 
+                  : "bg-background border-border opacity-60"
+              )}
+            >
+              <span className={cn("text-[9px] font-bold uppercase", isActive ? "text-white/80" : "text-muted-foreground")}>{tier.label}</span>
+              <span className={cn("text-[11px] font-black", isActive ? "text-white" : "text-foreground")}>{tier.discount}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function CheckoutForm() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   
   useEffect(() => {
-    setIsMounted(true);
+    // Use queueMicrotask to avoid synchronous setState warning while still handling hydration correctly
+    queueMicrotask(() => setIsMounted(true));
   }, []);
 
   const storeItems = useCartStore((s) => s.items);
@@ -82,9 +272,20 @@ export function CheckoutForm() {
     defaultValues: {
       paymentMethod: "cash_on_delivery",
       zone: ZONE_DEFAULT,
-      items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
+      items: [],
     },
   });
+
+  // Sync cart items to form state after mount to avoid hydration mismatch
+  useEffect(() => {
+    if (isMounted && storeItems.length > 0) {
+      setValue(
+        "items",
+        storeItems.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
+        { shouldValidate: true }
+      );
+    }
+  }, [isMounted, storeItems, setValue]);
 
   // useWatch is the memoizable variant — avoids the React Compiler skip.
   const selectedZoneId = useWatch({ control, name: "zone" });
@@ -125,9 +326,11 @@ export function CheckoutForm() {
     }
   };
 
+  if (!isMounted) return <div className="h-96 flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-      <div className="space-y-6 lg:col-span-2">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-8 lg:grid-cols-3">
+      <div className="lg:col-span-2 space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>Datos del cliente</CardTitle>
@@ -157,33 +360,11 @@ export function CheckoutForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Zona</Label>
-              <Select
-                defaultValue={ZONE_DEFAULT}
-                onValueChange={(value) => value && setValue("zone", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona tu provincia" />
-                </SelectTrigger>
-                <SelectContent>
-                  {REGION_ORDER.map((region) => {
-                    const zones = ZONES_BY_REGION[region];
-                    if (!zones?.length) return null;
-                    return (
-                      <SelectGroup key={region}>
-                        <SelectLabel className="px-2 pt-2 text-[10px] font-bold uppercase tracking-wider text-brand-orange">
-                          {REGION_LABELS[region]}
-                        </SelectLabel>
-                        {zones.map((z) => (
-                          <SelectItem key={z.id} value={z.id}>
-                            {z.name} (+RD${z.cost})
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              <Label>Zona de entrega</Label>
+              <SmartZoneSelector 
+                value={selectedZoneId || ZONE_DEFAULT} 
+                onChange={(val) => setValue("zone", val, { shouldValidate: true })} 
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="address">Dirección detallada</Label>
@@ -262,8 +443,11 @@ export function CheckoutForm() {
           <CardHeader>
             <CardTitle>Resumen del pedido</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
+          <CardContent className="space-y-6">
+            <DiscountProgress subtotal={subtotal} />
+            
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-tight">Detalle de items</h3>
               {items.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Carrito vacío.</p>
               ) : (

@@ -30,8 +30,7 @@ export const PaymentStatusEnum = z.enum([
 ]);
 
 // ─── Delivery Zones ────────────────────────────────────────────
-// Cobertura nacional. Costos calibrados a partir del HQ en La Vega:
-// Cibao Central (más cerca) = más barato; Sur profundo / frontera = más caro.
+// Cobertura nacional completa.
 
 export const RegionEnum = z.enum([
   'cibao-central',
@@ -52,6 +51,16 @@ export const DeliveryZoneSchema = z.object({
 });
 
 export const DELIVERY_ZONES: DeliveryZone[] = [
+  // ── Capital y alrededores (Zonas Detalladas) ───────────────────
+  { id: 'distrito-nacional',   name: 'Distrito Nacional',          cost: 200, region: 'capital' },
+  { id: 'santo-domingo-este',  name: 'Santo Domingo Este',         cost: 200, region: 'capital' },
+  { id: 'santo-domingo-oeste', name: 'Santo Domingo Oeste',        cost: 250, region: 'capital' },
+  { id: 'santo-domingo-norte', name: 'Santo Domingo Norte',        cost: 250, region: 'capital' },
+  { id: 'haina',               name: 'Haina',                      cost: 300, region: 'capital' },
+  { id: 'monte-plata',         name: 'Monte Plata',                cost: 300, region: 'capital' },
+  { id: 'san-cristobal',       name: 'San Cristóbal',              cost: 250, region: 'capital' },
+  { id: 'peravia',             name: 'Peravia (Baní)',             cost: 350, region: 'capital' },
+
   // ── Cibao Central (HQ La Vega) ─────────────────────────────
   { id: 'la-vega',           name: 'La Vega',                    cost: 100, region: 'cibao-central' },
   { id: 'espaillat',         name: 'Espaillat (Moca)',           cost: 120, region: 'cibao-central' },
@@ -71,13 +80,6 @@ export const DELIVERY_ZONES: DeliveryZone[] = [
   { id: 'santiago-rodriguez',name: 'Santiago Rodríguez',         cost: 300, region: 'cibao-noroeste' },
   { id: 'monte-cristi',      name: 'Monte Cristi',               cost: 300, region: 'cibao-noroeste' },
   { id: 'dajabon',           name: 'Dajabón',                    cost: 350, region: 'cibao-noroeste' },
-
-  // ── Capital y alrededores ──────────────────────────────────
-  { id: 'distrito-nacional', name: 'Distrito Nacional',          cost: 200, region: 'capital' },
-  { id: 'santo-domingo',     name: 'Santo Domingo (Provincia)',  cost: 200, region: 'capital' },
-  { id: 'monte-plata',       name: 'Monte Plata',                cost: 250, region: 'capital' },
-  { id: 'san-cristobal',     name: 'San Cristóbal',              cost: 250, region: 'capital' },
-  { id: 'peravia',           name: 'Peravia (Baní)',             cost: 280, region: 'capital' },
 
   // ── Sur ────────────────────────────────────────────────────
   { id: 'san-jose-de-ocoa',  name: 'San José de Ocoa',           cost: 320, region: 'sur' },

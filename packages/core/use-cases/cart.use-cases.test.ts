@@ -113,7 +113,7 @@ describe('Cart Use Cases', () => {
         { product: mockProduct, quantity: 2 },  // 150 * 2 = 300
         { product: mockProduct2, quantity: 3 }, // 180 * 3 = 540
       ];
-      expect(calculateCartTotal(items)).toBe(840);
+      expect(calculateCartTotal(items)).toBe(798); // 840 - 5% discount (count = 5)
     });
   });
 

@@ -55,21 +55,20 @@ export function calculateCartItemCount(items: CartItem[]): number {
 }
 
 /** 
- * Calculate the discount amount based on volume. 
+ * Calculate the discount amount based on order value. 
  * Escala de descuentos por volumen:
- * 3 a 5 unidades: 5%
- * 6 a 11 unidades: 10%
- * 12+ unidades: 15%
+ * RD$5,000 - $9,999: 5%
+ * RD$10,000 - $19,999: 10%
+ * RD$20,000+: 15%
  */
 export function calculateCartDiscount(items: CartItem[]): number {
-  const count = calculateCartItemCount(items);
   const subtotal = calculateCartSubtotal(items);
   
-  if (count >= 12) {
+  if (subtotal >= 20000) {
     return subtotal * 0.15;
-  } else if (count >= 6) {
+  } else if (subtotal >= 10000) {
     return subtotal * 0.10;
-  } else if (count >= 3) {
+  } else if (subtotal >= 5000) {
     return subtotal * 0.05;
   }
   
