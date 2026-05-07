@@ -9,8 +9,11 @@ import { cn } from "@/lib/utils";
 
 type Order = {
   id: string;
+  created_at: string;
   status: string;
   total: number;
+  customer_name: string | null;
+  customer_email: string | null;
   payment_method: "cash_on_delivery" | "bank_transfer";
   payment_status:
     | "awaiting_voucher"
@@ -23,6 +26,12 @@ type Order = {
   zone: string;
   shipping_cost: number;
   phone: string;
+  order_items: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    products: { name: string } | null;
+  }>;
 };
 
 const STATUS_LABELS: Record<Order["payment_status"], { label: string; tone: string; icon: typeof CheckCircle2 }> = {
@@ -34,13 +43,16 @@ const STATUS_LABELS: Record<Order["payment_status"], { label: string; tone: stri
   failed:           { label: "Pago rechazado", tone: "red", icon: ShieldAlert },
 };
 
+import { InvoiceDialog } from "@/features/checkout/components/InvoiceDialog";
+
 export default async function OrderConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
   const { data: order } = await supabase
     .from("orders")
     .select(
-      "id, status, total, payment_method, payment_status, delivery_address, zone, shipping_cost, phone",
+      `id, created_at, status, total, customer_name, customer_email, payment_method, payment_status, delivery_address, zone, shipping_cost, phone, 
+       order_items ( id, quantity, price, products ( name ) )`,
     )
     .eq("id", id)
     .maybeSingle<Order>();
@@ -73,18 +85,22 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
           recibida.
         </p>
 
-        <span
-          className={cn(
-            "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider",
-            statusMeta.tone === "lime" && "bg-brand-lime/15 text-brand-lime",
-            statusMeta.tone === "amber" && "bg-amber-500/15 text-amber-600",
-            statusMeta.tone === "orange" && "bg-brand-orange/15 text-brand-orange",
-            statusMeta.tone === "red" && "bg-destructive/15 text-destructive",
-          )}
-        >
-          <StatusIcon className="h-3.5 w-3.5" aria-hidden />
-          {statusMeta.label}
-        </span>
+        <div className="flex flex-col items-center gap-3">
+          <span
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider",
+              statusMeta.tone === "lime" && "bg-brand-lime/15 text-brand-lime",
+              statusMeta.tone === "amber" && "bg-amber-500/15 text-amber-600",
+              statusMeta.tone === "orange" && "bg-brand-orange/15 text-brand-orange",
+              statusMeta.tone === "red" && "bg-destructive/15 text-destructive",
+            )}
+          >
+            <StatusIcon className="h-3.5 w-3.5" aria-hidden />
+            {statusMeta.label}
+          </span>
+          
+          <InvoiceDialog order={order} />
+        </div>
       </header>
 
       <div className="grid gap-3 text-center sm:grid-cols-3">
@@ -142,6 +158,9 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
           <CardTitle>Detalles del envío</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
+          <p>
+            <span className="font-medium">Cliente:</span> {order.customer_name || "Cliente General"}
+          </p>
           <p>
             <span className="font-medium">Dirección:</span> {order.delivery_address}
           </p>

@@ -1,6 +1,7 @@
 "use client";
-// Force recompile: 1.6
+// Force recompile: 3.0
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -217,10 +218,13 @@ export function MfaEnrollmentFlow() {
 
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             <div className="rounded-2xl bg-white p-3 shadow-lg shadow-primary/10">
-              <img
+              <Image
                 src={enroll.qrCode}
                 alt="Código QR de autenticación"
+                width={192}
+                height={192}
                 className="h-48 w-48"
+                unoptimized
               />
             </div>
             <div className="flex-1 space-y-3">

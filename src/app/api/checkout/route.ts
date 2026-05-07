@@ -86,6 +86,8 @@ export async function POST(req: Request) {
       .from("orders")
       .insert({
         user_id: user?.id ?? null,
+        customer_name: payload.fullName,
+        customer_email: payload.email,
         total,
         status: "pending",
         payment_method: payload.paymentMethod,

@@ -46,7 +46,7 @@ export function CartDrawer() {
           <SheetTitle>Tu Carrito</SheetTitle>
         </SheetHeader>
         
-        <ScrollArea className="grow my-4 pr-4">
+        <ScrollArea className="flex-1 min-h-0 my-4 pr-4">
           {currentItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20 text-center">
               <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />

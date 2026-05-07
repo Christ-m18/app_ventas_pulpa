@@ -13,7 +13,7 @@ export function BrandFooter() {
   }, []);
 
   return (
-    <footer className="border-t border-border/60 bg-muted/40 px-4 py-5 md:py-6">
+    <footer className="border-t border-border/60 bg-muted/40 px-4 pt-5 pb-24 md:py-6">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
         <p className="text-xs leading-relaxed text-muted-foreground md:flex-1">
           {mounted ? (
