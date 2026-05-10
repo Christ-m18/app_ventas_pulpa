@@ -8,6 +8,7 @@ import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { profileUpdateSchema, type ProfileUpdateInput } from "@/features/profile/schemas";
 
@@ -23,6 +24,7 @@ export function ProfileForm({ email, initial }: Props) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<ProfileUpdateInput>({
     resolver: zodResolver(profileUpdateSchema),
@@ -69,6 +71,9 @@ export function ProfileForm({ email, initial }: Props) {
         <Input
           id="profile-name"
           autoComplete="name"
+          pattern="[a-zA-ZÀ-ÿ\s'.\\-]+"
+          maxLength={80}
+          placeholder="Tu nombre completo"
           aria-invalid={!!errors.fullName}
           aria-describedby={errors.fullName ? "profile-name-error" : undefined}
           {...register("fullName")}
@@ -82,11 +87,9 @@ export function ProfileForm({ email, initial }: Props) {
 
       <div className="space-y-2">
         <Label htmlFor="profile-phone">Teléfono (WhatsApp)</Label>
-        <Input
+        <PhoneInput
           id="profile-phone"
-          type="tel"
-          autoComplete="tel"
-          placeholder="809-000-0000"
+          maxLength={20}
           aria-invalid={!!errors.phone}
           aria-describedby={errors.phone ? "profile-phone-error" : undefined}
           {...register("phone")}
@@ -104,24 +107,36 @@ export function ProfileForm({ email, initial }: Props) {
         </p>
       )}
 
-      <Button
-        type="submit"
-        size="lg"
-        className="bg-brand-orange text-white hover:bg-brand-orange/90"
-        disabled={isSubmitting || !isDirty}
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-            Guardando...
-          </>
-        ) : (
-          <>
-            <Save className="mr-2 h-4 w-4" aria-hidden />
-            Guardar cambios
-          </>
+      <div className="flex items-center gap-3">
+        <Button
+          type="submit"
+          size="lg"
+          className="bg-brand-orange text-white hover:bg-brand-orange/90"
+          disabled={isSubmitting || !isDirty}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+              Guardando...
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" aria-hidden />
+              Guardar cambios
+            </>
+          )}
+        </Button>
+        {isDirty && (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => reset()}
+          >
+            Cancelar
+          </Button>
         )}
-      </Button>
+      </div>
     </form>
   );
 }

@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Receipt,
   Truck,
+  Users,
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,12 @@ const sections: Array<{
     items: [
       { href: "/admin/products", label: "Productos", icon: Boxes },
       { href: "/admin/billing", label: "Facturación", icon: Receipt },
+    ],
+  },
+  {
+    label: "Gestión",
+    items: [
+      { href: "/admin/users", label: "Usuarios", icon: Users },
     ],
   },
 ];

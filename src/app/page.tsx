@@ -12,6 +12,8 @@ import { productService } from "@/features/products/services/productService";
 import { AtSign, ArrowRight, Leaf, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Inicio",
   description: `${BRAND.tagline} Catálogo, entrega y fotos reales de la marca.`,

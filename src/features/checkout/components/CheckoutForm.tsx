@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useCartStore } from "@/features/cart/store/useCartStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -338,17 +339,35 @@ export function CheckoutForm() {
           <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="fullName">Nombre completo</Label>
-              <Input id="fullName" placeholder="Juan Pérez" {...register("fullName")} />
+              <Input
+                id="fullName"
+                placeholder="Juan Pérez"
+                autoComplete="name"
+                pattern="[a-zA-ZÀ-ÿ\s'.\\-]+"
+                maxLength={120}
+                {...register("fullName")}
+              />
               {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Correo electrónico</Label>
-              <Input id="email" type="email" placeholder="juan@correo.com" {...register("email")} />
+              <Input
+                id="email"
+                type="email"
+                inputMode="email"
+                placeholder="juan@correo.com"
+                autoComplete="email"
+                {...register("email")}
+              />
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="phone">Teléfono (WhatsApp)</Label>
-              <Input id="phone" placeholder="809-000-0000" {...register("phone")} />
+              <PhoneInput
+                id="phone"
+                maxLength={20}
+                {...register("phone")}
+              />
               {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
             </div>
           </CardContent>

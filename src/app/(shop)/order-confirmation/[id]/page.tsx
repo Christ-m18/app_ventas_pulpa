@@ -6,6 +6,7 @@ import { BankAccountList } from "@/features/checkout/components/BankAccountList"
 import { VoucherUploader } from "@/features/checkout/components/VoucherUploader";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server";
 import { cn } from "@/lib/utils";
+import { formatPhone } from "@/lib/format-phone";
 
 type Order = {
   id: string;
@@ -165,7 +166,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
             <span className="font-medium">Dirección:</span> {order.delivery_address}
           </p>
           <p>
-            <span className="font-medium">Teléfono:</span> {order.phone}
+            <span className="font-medium">Teléfono:</span> {formatPhone(order.phone)}
           </p>
           <p>
             <span className="font-medium">Método de pago:</span>{" "}

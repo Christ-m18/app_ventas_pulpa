@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, Pencil, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
+import { LayoutDashboard, Mail, Pencil, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
 import { getAal, getCurrentProfile, requireUser } from "@/infrastructure/auth/dal";
@@ -28,6 +28,7 @@ export default async function CuentaPage() {
 
   const displayName = profile?.full_name?.trim() || user.email?.split("@")[0] || "Cliente";
   const mfaActive = aal?.currentLevel === "aal2" || aal?.nextLevel === "aal2";
+  const isAdmin = profile?.role === "admin";
 
   // Quick peek of last 3 orders for the dashboard.
   let recentOrders: Array<{
@@ -65,6 +66,28 @@ export default async function CuentaPage() {
           Gestiona tu identidad, seguridad y pedidos en un solo lugar.
         </p>
       </header>
+
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className="group mb-4 flex items-center gap-4 rounded-3xl border border-brand-orange/30 bg-brand-orange/5 p-5 shadow-md transition-luxury hover:-translate-y-0.5 hover:border-brand-orange/50 hover:shadow-xl hover:shadow-brand-orange/15"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-orange text-white shadow-lg shadow-brand-orange/30">
+            <LayoutDashboard className="h-6 w-6" aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-black tracking-tight md:text-base">
+              Panel de Administración
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Gestiona órdenes, pagos, entregas, productos e inventario.
+            </p>
+          </div>
+          <span className="shrink-0 text-sm font-bold text-brand-orange transition-luxury group-hover:translate-x-1">
+            Abrir →
+          </span>
+        </Link>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* Identidad */}

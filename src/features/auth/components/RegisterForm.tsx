@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { registerSchema, type RegisterInput } from "@/features/auth/schemas";
 
@@ -73,9 +74,11 @@ export function RegisterForm() {
         <Input
           id="reg-name"
           autoComplete="name"
+          pattern="[a-zA-ZÀ-ÿ\s'.\\-]+"
+          maxLength={80}
           aria-invalid={!!errors.fullName}
           aria-describedby={errors.fullName ? "reg-name-error" : undefined}
-          placeholder="Tu nombre"
+          placeholder="Tu nombre completo"
           {...register("fullName")}
         />
         {errors.fullName && (
@@ -87,13 +90,11 @@ export function RegisterForm() {
 
       <div className="space-y-2">
         <Label htmlFor="reg-phone">Teléfono</Label>
-        <Input
+        <PhoneInput
           id="reg-phone"
-          type="tel"
-          autoComplete="tel"
+          maxLength={20}
           aria-invalid={!!errors.phone}
           aria-describedby={errors.phone ? "reg-phone-error" : undefined}
-          placeholder="Tu número de teléfono"
           {...register("phone")}
         />
         {errors.phone && (
@@ -108,6 +109,7 @@ export function RegisterForm() {
         <Input
           id="reg-email"
           type="email"
+          inputMode="email"
           autoComplete="email"
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "reg-email-error" : undefined}

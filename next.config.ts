@@ -10,7 +10,7 @@ const cspHeader = `
   img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com;
   connect-src 'self' wss://*.supabase.co https://*.supabase.co https://generativelanguage.googleapis.com ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*;
   font-src 'self' https://fonts.gstatic.com;
-  media-src 'self';
+  media-src 'self' https://*.supabase.co;
   object-src 'none';
   manifest-src 'self';
   worker-src 'self';

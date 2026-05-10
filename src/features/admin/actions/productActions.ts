@@ -64,6 +64,8 @@ export async function createProductAction(_prev: unknown, formData: FormData) {
   try {
     const { id } = await createProduct(parsed.data as ProductInput);
     revalidatePath("/admin/products");
+    revalidatePath("/");
+    revalidatePath("/tienda");
     redirect(`/admin/products/${id}/edit`);
   } catch (e) {
     return {
@@ -90,6 +92,8 @@ export async function updateProductAction(
     await updateProduct(productId, parsed.data as ProductInput);
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${productId}/edit`);
+    revalidatePath("/");
+    revalidatePath("/tienda");
     return { ok: true as const };
   } catch (e) {
     return {
@@ -118,6 +122,8 @@ export async function toggleFeaturedAction(productId: string, value: boolean) {
   try {
     await toggleFeatured(productId, value);
     revalidatePath("/admin/products");
+    revalidatePath("/");
+    revalidatePath("/tienda");
     return { ok: true as const };
   } catch (e) {
     return {

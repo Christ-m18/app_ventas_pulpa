@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { profileUpdateSchema } from "@/features/profile/schemas";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAdminClient, isAdminAvailable } from "@/infrastructure/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,7 @@ export async function PATCH(req: Request) {
     );
   }
 
+  // Authenticate user via their session
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -32,7 +34,17 @@ export async function PATCH(req: Request) {
 
   const phone = parsed.data.phone?.trim() || null;
 
-  const { data, error } = await supabase
+  // Use admin client to bypass RLS — user is already authenticated above.
+  // Only update full_name and phone (never role) to prevent privilege escalation.
+  if (!isAdminAvailable()) {
+    return NextResponse.json(
+      { error: "Servicio de perfil no disponible" },
+      { status: 503 },
+    );
+  }
+
+  const adminClient = createSupabaseAdminClient();
+  const { data, error } = await adminClient
     .from("profiles")
     .update({
       full_name: parsed.data.fullName,

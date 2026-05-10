@@ -1,26 +1,3 @@
-
-// --- AUTO-INJECTED ENV LOADER ---
-(() => {
-  const fs = require('fs');
-  const path = require('path');
-  const envFile = path.join(__dirname, '.env.local');
-  if (fs.existsSync(envFile)) {
-    const envConfig = fs.readFileSync(envFile, 'utf8').split('\n');
-    envConfig.forEach(line => {
-      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-      if (match) {
-        const key = match[1];
-        let value = match[2] || '';
-        value = value.replace(/^(['"])(.*)\1$/, '$2');
-        if (process.env[key] === undefined) {
-          process.env[key] = value;
-        }
-      }
-    });
-  }
-})();
-// --------------------------------
-
 const path = require('path')
 
 const dir = path.join(__dirname)

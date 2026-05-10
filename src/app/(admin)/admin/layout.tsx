@@ -19,12 +19,14 @@ export default async function AdminLayout({
   const displayName = profile.full_name?.trim() || user.email?.split("@")[0] || "Admin";
 
   return (
-    <div className="flex min-h-screen w-full">
-      <AdminSidebar />
-      <div className="flex min-h-screen flex-1 flex-col">
-        <AdminTopbar displayName={displayName} email={user.email ?? ""} />
-        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
-        <AdminMobileNav />
+    <div className="admin-shell">
+      <div className="flex min-h-screen w-full bg-background">
+        <AdminSidebar />
+        <div className="flex min-h-screen flex-1 flex-col overflow-x-hidden">
+          <AdminTopbar displayName={displayName} email={user.email ?? ""} />
+          <main className="flex-1 px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">{children}</main>
+          <AdminMobileNav />
+        </div>
       </div>
     </div>
   );

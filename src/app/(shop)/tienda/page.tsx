@@ -8,6 +8,8 @@ import { BRAND } from "@/lib/brand";
 import { getSiteJpegPaths } from "@/lib/site-images";
 import { ArrowRight, Zap, Droplets, Leaf, Sparkles } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function TiendaPage() {
   const featuredProducts = await productService.getFeaturedProducts();
   const jpegPaths = getSiteJpegPaths();

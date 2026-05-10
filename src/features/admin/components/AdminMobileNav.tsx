@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Receipt,
   Truck,
+  Users,
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ const items = [
   { href: "/admin/deliveries", label: "Entregas", icon: Truck },
   { href: "/admin/products", label: "Productos", icon: Boxes },
   { href: "/admin/billing", label: "Reportes", icon: Receipt },
+  { href: "/admin/users", label: "Usuarios", icon: Users },
 ];
 
 export function AdminMobileNav() {
@@ -28,7 +30,7 @@ export function AdminMobileNav() {
     href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <nav className="sticky bottom-0 z-30 flex items-stretch gap-1 overflow-x-auto border-t border-border/60 bg-background/95 px-2 py-2 backdrop-blur-xl scrollbar-hide lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex items-stretch gap-1 overflow-x-auto border-t border-border/60 bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl scrollbar-hide lg:hidden">
       {items.map(({ href, label, icon: Icon }) => {
         const active = isActive(href);
         return (

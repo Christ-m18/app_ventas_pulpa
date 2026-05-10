@@ -1,55 +1,14 @@
 import type { Product } from "../../../../packages/core/domain/entities/product";
 
-const I = (filename: string) => `/images/${filename}`;
+const FALLBACK = "/images/Pulpa de tamarindo.mp4";
 
-// Catálogo de assets reales del perfil. Cada entrada DEBE existir en
-// /public/images/ con el nombre exacto. Mezcla jpg (foto) y mp4 (video).
-const REAL = {
-  tamarindo: I("Pulpa de tamarindo.mp4"),
-  fresa: I("Fresas congeladas.jpg"),
-  cereza: I("Pulpa de cereza.mp4"),
-  chinola: I("Pulpa de chinola.mp4"),
-  guanabana: I("Pulpa de guanábana.mp4"),
-  mango: I("Pulpa de mango.mp4"),
-  naranjaJugo: I("Zumo de naranja de jugo.mp4"),
-  naranjaAgria: I("Zumo de naranja agria.mp4"),
-  mandarina: I("Zumo de mandarina.mp4"),
-  limon: I("Zumo de limón.mp4"),
-} as const;
-
-const FALLBACK = REAL.tamarindo;
-
-const PATH_OVERRIDES: Record<string, string> = {
-  "/images/mango.jpg": REAL.mango,
-  "/images/chinola.jpg": REAL.chinola,
-  "/images/guanabana.jpg": REAL.guanabana,
-  "/images/fresa.jpg": REAL.fresa,
-  "/images/limon.jpg": REAL.limon,
-  "/images/tamarindo.jpg": REAL.tamarindo,
-  "/images/cereza.jpg": REAL.cereza,
-};
-
-const NAME_RULES: Array<{ pattern: RegExp; image: string }> = [
-  { pattern: /tamarindo/i, image: REAL.tamarindo },
-  { pattern: /fresa/i, image: REAL.fresa },
-  { pattern: /cereza/i, image: REAL.cereza },
-  { pattern: /chinola/i, image: REAL.chinola },
-  { pattern: /guan[áa]bana/i, image: REAL.guanabana },
-  { pattern: /mango/i, image: REAL.mango },
-  { pattern: /naranja\s*agria/i, image: REAL.naranjaAgria },
-  { pattern: /naranja/i, image: REAL.naranjaJugo },
-  { pattern: /mandarina/i, image: REAL.mandarina },
-  { pattern: /lim[óo]n/i, image: REAL.limon },
-];
-
+/**
+ * Returns the image/video URL for a product.
+ * Now that images are stored in Supabase Storage with full URLs in the DB,
+ * this simply returns the DB value or a fallback.
+ */
 export function resolveProductImage(product: Pick<Product, "name" | "image_url">): string {
-  const url = product.image_url;
-  if (url && PATH_OVERRIDES[url]) return PATH_OVERRIDES[url];
-  if (url && (url.startsWith("/images/Pulpa") || url.startsWith("/images/Zumo") || url.startsWith("/images/Fresas"))) return url;
-
-  const match = NAME_RULES.find((r) => r.pattern.test(product.name));
-  if (match) return match.image;
-
+  if (product.image_url && product.image_url.length > 0) return product.image_url;
   return FALLBACK;
 }
 

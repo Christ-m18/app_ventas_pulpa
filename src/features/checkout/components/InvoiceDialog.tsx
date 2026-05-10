@@ -13,6 +13,7 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { jsPDF } from "jspdf";
+import { formatPhone } from "@/lib/format-phone";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 
@@ -50,9 +51,9 @@ function InvoiceContent({ order }: { order: InvoiceDialogProps["order"] }) {
           <h2 className="text-4xl font-black text-brand-orange mb-1 leading-tight">RICHARD<br/>PULPAS</h2>
           <p className="text-sm text-slate-500 max-w-[280px] leading-relaxed">
             Frutas frescas y pulpas de la mejor calidad.
-            Santo Domingo, República Dominicana.
+            Los Hornos, La Vega, República Dominicana.
             <br />
-            <span className="font-bold text-slate-400">Tel: (829) 424-3715</span>
+            <span className="font-bold text-slate-400">Tel: (809) 696-1049</span>
           </p>
         </div>
         <div className="text-right">
@@ -70,7 +71,7 @@ function InvoiceContent({ order }: { order: InvoiceDialogProps["order"] }) {
           <h3 className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-3 border-b-2 border-slate-100 pb-1">Cliente</h3>
           <div className="text-base font-bold text-slate-900">{order.customer_name || "Cliente General"}</div>
           <div className="text-sm text-slate-600">{order.customer_email || ""}</div>
-          <div className="text-sm text-slate-600 mt-1">{order.phone}</div>
+          <div className="text-sm text-slate-600 mt-1">{formatPhone(order.phone)}</div>
         </div>
         <div>
           <h3 className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-3 border-b-2 border-slate-100 pb-1">Enviar a</h3>

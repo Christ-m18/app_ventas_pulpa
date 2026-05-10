@@ -22,12 +22,14 @@ export const registerSchema = z.object({
     .string()
     .trim()
     .min(2, { error: "Nombre demasiado corto." })
-    .max(80, { error: "Nombre demasiado largo." }),
+    .max(80, { error: "Nombre demasiado largo." })
+    .regex(/^[a-zA-ZÀ-ÿ\s'.-]+$/, { error: "Nombre solo puede contener letras y espacios." }),
   phone: z
     .string()
     .trim()
-    .min(10, { error: "Teléfono demasiado corto." })
-    .max(20, { error: "Teléfono demasiado largo." }),
+    .min(10, { error: "Teléfono debe tener al menos 10 dígitos." })
+    .max(20, { error: "Teléfono demasiado largo." })
+    .regex(/^[\d\s\-+()]+$/, { error: "Formato inválido." }),
   email: emailSchema,
   password: passwordSchema,
 });
