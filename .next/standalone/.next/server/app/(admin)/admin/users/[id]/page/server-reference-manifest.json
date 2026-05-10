@@ -1,0 +1,17 @@
+{
+  "node": {
+    "6096ef3dc45b02132b38dd7290a62412f17e46c0c0": {
+      "workers": {
+        "app/(admin)/admin/users/[id]/page": {
+          "moduleId": 39361,
+          "async": false,
+          "exportedName": "updateUserRoleAction",
+          "filename": "src/features/admin/actions/userActions.ts"
+        }
+      },
+      "exportedName": "updateUserRoleAction",
+      "filename": "src/features/admin/actions/userActions.ts"
+    }
+  },
+  "edge": {}
+}

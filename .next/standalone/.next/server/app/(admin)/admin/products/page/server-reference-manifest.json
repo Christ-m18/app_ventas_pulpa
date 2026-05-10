@@ -1,0 +1,17 @@
+{
+  "node": {
+    "6084a187795fd531ecfcffa46ef9eb1e14298804dc": {
+      "workers": {
+        "app/(admin)/admin/products/page": {
+          "moduleId": 15055,
+          "async": false,
+          "exportedName": "toggleFeaturedAction",
+          "filename": "src/features/admin/actions/productActions.ts"
+        }
+      },
+      "exportedName": "toggleFeaturedAction",
+      "filename": "src/features/admin/actions/productActions.ts"
+    }
+  },
+  "edge": {}
+}
