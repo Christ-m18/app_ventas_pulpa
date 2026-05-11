@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Copy, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
+import { Copy, KeyRound, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,11 @@ export function MfaEnrollmentFlow() {
   const [enroll, setEnroll] = useState<EnrollState | null>(null);
   const [busy, setBusy] = useState(false);
   const [sessionError, setSessionError] = useState(false);
+  // AAL gate: if user has verified factors but session is AAL1, require verification first
+  const [needsAal2, setNeedsAal2] = useState(false);
+  const [aal2Code, setAal2Code] = useState("");
+  const [aal2Error, setAal2Error] = useState<string | null>(null);
+  // Remove confirmation
   const [removingFactorId, setRemovingFactorId] = useState<string | null>(null);
   const [removeCode, setRemoveCode] = useState("");
   const [removeError, setRemoveError] = useState<string | null>(null);
@@ -42,39 +47,51 @@ export function MfaEnrollmentFlow() {
     defaultValues: { code: "" },
   });
 
-  const loadFactors = useCallback(async () => {
-    const { data, error } = await supabase.auth.mfa.listFactors();
+  const loadFactorsAndCheckAal = useCallback(async () => {
+    const [factorsResult, aalResult] = await Promise.all([
+      supabase.auth.mfa.listFactors(),
+      supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+    ]);
     if (!mountedRef.current) return;
-    if (error) {
-      console.warn("MFA listFactors error:", error.message);
+
+    if (factorsResult.error) {
+      console.warn("MFA listFactors error:", factorsResult.error.message);
       setFactors([]);
       return;
     }
-    setFactors((data?.totp ?? []) as Factor[]);
+
+    const allFactors = (factorsResult.data?.totp ?? []) as Factor[];
+    setFactors(allFactors);
+
+    // Check if we need AAL2 elevation
+    const hasVerified = allFactors.some(f => f.status === "verified");
+    const aal = aalResult.data;
+    if (hasVerified && aal && aal.currentLevel === "aal1" && aal.nextLevel === "aal2") {
+      setNeedsAal2(true);
+    } else {
+      setNeedsAal2(false);
+    }
   }, []);
 
   // Wait for auth session to be ready before calling MFA methods
   useEffect(() => {
     mountedRef.current = true;
 
-    // First try: the session may already be restored
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mountedRef.current) return;
       if (session) {
-        void loadFactors();
+        void loadFactorsAndCheckAal();
       } else {
-        // Session not yet restored — wait for auth state change
         setSessionError(true);
       }
     });
 
-    // Listen for auth state changes (session restore, sign-in, sign-out)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mountedRef.current) return;
         if (session) {
           setSessionError(false);
-          void loadFactors();
+          void loadFactorsAndCheckAal();
         } else if (event === "SIGNED_OUT") {
           setFactors([]);
           setSessionError(true);
@@ -86,38 +103,87 @@ export function MfaEnrollmentFlow() {
       mountedRef.current = false;
       subscription.unsubscribe();
     };
-  }, [loadFactors]);
+  }, [loadFactorsAndCheckAal]);
+
+  // Elevate session from AAL1 to AAL2
+  async function elevateToAal2() {
+    if (aal2Code.length !== 6) return;
+    setBusy(true);
+    setAal2Error(null);
+
+    try {
+      const verifiedFactor = factors?.find(f => f.status === "verified");
+      if (!verifiedFactor) {
+        setAal2Error("No se encontró un autenticador verificado.");
+        setBusy(false);
+        return;
+      }
+
+      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: verifiedFactor.id,
+      });
+      if (challengeError) {
+        setAal2Error(challengeError.message);
+        setBusy(false);
+        return;
+      }
+
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: verifiedFactor.id,
+        challengeId: challenge.id,
+        code: aal2Code,
+      });
+      if (verifyError) {
+        setAal2Error("Código incorrecto. Verifica e intenta de nuevo.");
+        setBusy(false);
+        return;
+      }
+
+      // Session is now AAL2
+      setNeedsAal2(false);
+      setAal2Code("");
+      toast.success("Identidad verificada");
+      void loadFactorsAndCheckAal();
+    } catch {
+      setAal2Error("Error inesperado. Intenta de nuevo.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function startEnrollment() {
     setBusy(true);
     try {
-      // 0. Verify we have an active session
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error("Tu sesión ha expirado. Cierra sesión y vuelve a entrar.");
         return;
       }
 
-      // 1. Limpieza automática de factores no verificados para evitar errores 422 y clutter
+      // Clean up unverified factors
       const { data: currentFactors, error: listError } = await supabase.auth.mfa.listFactors();
       if (listError) {
         toast.error("No se pudo verificar el estado de seguridad. Intenta cerrar sesión y volver a entrar.");
         return;
       }
       const unverifiedFactors = (currentFactors?.totp as unknown as Factor[] | undefined)?.filter(f => f.status === "unverified") || [];
-      
       for (const factor of unverifiedFactors) {
         await supabase.auth.mfa.unenroll({ factorId: factor.id });
       }
 
-      // 2. Iniciar nuevo enrolamiento con nombre único
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
         friendlyName: `Authenticator ${new Date().toLocaleString()}`,
       });
 
       if (error) {
-        toast.error(error.message);
+        if (error.message.includes("AAL2")) {
+          // Session dropped back to AAL1 — prompt re-verification
+          setNeedsAal2(true);
+          toast.error("Necesitas verificar tu identidad primero.");
+        } else {
+          toast.error(error.message);
+        }
         return;
       }
 
@@ -141,7 +207,7 @@ export function MfaEnrollmentFlow() {
     setBusy(false);
     setEnroll(null);
     reset();
-    void loadFactors();
+    void loadFactorsAndCheckAal();
   }
 
   async function verifyEnrollment(values: TotpEnrollInput) {
@@ -165,7 +231,7 @@ export function MfaEnrollmentFlow() {
     toast.success("Autenticador activado");
     setEnroll(null);
     reset();
-    void loadFactors();
+    void loadFactorsAndCheckAal();
   }
 
   function promptRemoveFactor(id: string) {
@@ -180,28 +246,31 @@ export function MfaEnrollmentFlow() {
     setRemoveError(null);
 
     try {
-      // 1. Elevate session to AAL2 by verifying TOTP code
-      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
-        factorId: removingFactorId,
-      });
-      if (challengeError) {
-        setRemoveError(challengeError.message);
-        setBusy(false);
-        return;
+      // Check if already at AAL2
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.currentLevel !== "aal2") {
+        // Need to elevate first
+        const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+          factorId: removingFactorId,
+        });
+        if (challengeError) {
+          setRemoveError(challengeError.message);
+          setBusy(false);
+          return;
+        }
+
+        const { error: verifyError } = await supabase.auth.mfa.verify({
+          factorId: removingFactorId,
+          challengeId: challenge.id,
+          code: removeCode,
+        });
+        if (verifyError) {
+          setRemoveError("Código incorrecto. Verifica e intenta de nuevo.");
+          setBusy(false);
+          return;
+        }
       }
 
-      const { error: verifyError } = await supabase.auth.mfa.verify({
-        factorId: removingFactorId,
-        challengeId: challenge.id,
-        code: removeCode,
-      });
-      if (verifyError) {
-        setRemoveError("Código incorrecto. Verifica e intenta de nuevo.");
-        setBusy(false);
-        return;
-      }
-
-      // 2. Now at AAL2 — safe to unenroll
       const { error } = await supabase.auth.mfa.unenroll({ factorId: removingFactorId });
       if (error) {
         setRemoveError(error.message);
@@ -212,7 +281,7 @@ export function MfaEnrollmentFlow() {
       toast.success("Autenticador removido");
       setRemovingFactorId(null);
       setRemoveCode("");
-      void loadFactors();
+      void loadFactorsAndCheckAal();
     } catch {
       setRemoveError("Error inesperado. Intenta de nuevo.");
     } finally {
@@ -237,7 +306,47 @@ export function MfaEnrollmentFlow() {
         </div>
       </div>
 
-      {sessionError ? (
+      {/* AAL2 verification gate */}
+      {needsAal2 ? (
+        <div className="rounded-2xl border border-amber-500/30 bg-card p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <KeyRound className="h-5 w-5 text-amber-500" aria-hidden />
+            <div>
+              <h3 className="text-base font-semibold">Verifica tu identidad</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Para gestionar tus autenticadores, ingresa el código de 6 dígitos de tu app autenticadora.
+              </p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Input
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              placeholder="123456"
+              value={aal2Code}
+              onChange={(e) => {
+                setAal2Code(e.target.value.replace(/\D/g, "").slice(0, 6));
+                setAal2Error(null);
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") void elevateToAal2(); }}
+              className="text-center text-2xl font-bold tracking-[0.5em]"
+              aria-invalid={!!aal2Error}
+            />
+            {aal2Error && (
+              <p role="alert" className="text-sm text-destructive">{aal2Error}</p>
+            )}
+          </div>
+          <Button
+            onClick={elevateToAal2}
+            disabled={busy || aal2Code.length !== 6}
+            size="lg"
+            className="w-full"
+          >
+            {busy ? "Verificando..." : "Verificar"}
+          </Button>
+        </div>
+      ) : sessionError ? (
         <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <ShieldAlert className="mt-0.5 h-5 w-5 text-destructive" aria-hidden />
           <p>No se pudo cargar la sesión. Intenta recargar la página o cerrar sesión y volver a entrar.</p>
@@ -329,7 +438,7 @@ export function MfaEnrollmentFlow() {
         </div>
       )}
 
-      {!enroll && (
+      {!enroll && !needsAal2 && !sessionError && factors !== null && (
         <Button onClick={startEnrollment} disabled={busy} size="lg" className="w-full sm:w-auto">
           Añadir autenticador
         </Button>

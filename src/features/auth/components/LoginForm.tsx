@@ -50,11 +50,20 @@ export function LoginForm() {
         return;
       }
 
+      // Check if user has MFA factors — both via AAL and listFactors as fallback
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aal?.nextLevel === "aal2" && aal.currentLevel === "aal1") {
-        const url = `/login/mfa?next=${encodeURIComponent(safeNext)}`;
-        router.replace(url);
-        router.refresh();
+      if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+        router.replace(`/login/mfa?next=${encodeURIComponent(safeNext)}`);
+        return;
+      }
+
+      // Fallback: check factors directly in case AAL check missed it
+      const { data: factorsData } = await supabase.auth.mfa.listFactors();
+      const hasVerifiedTotp = factorsData?.totp?.some(
+        (f: { status: string }) => f.status === "verified"
+      );
+      if (hasVerifiedTotp && aal?.currentLevel !== "aal2") {
+        router.replace(`/login/mfa?next=${encodeURIComponent(safeNext)}`);
         return;
       }
 
