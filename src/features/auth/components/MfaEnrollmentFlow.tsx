@@ -25,6 +25,9 @@ export function MfaEnrollmentFlow() {
   const [enroll, setEnroll] = useState<EnrollState | null>(null);
   const [busy, setBusy] = useState(false);
   const [sessionError, setSessionError] = useState(false);
+  const [removingFactorId, setRemovingFactorId] = useState<string | null>(null);
+  const [removeCode, setRemoveCode] = useState("");
+  const [removeError, setRemoveError] = useState<string | null>(null);
   const mountedRef = useRef(true);
 
   const {
@@ -165,16 +168,56 @@ export function MfaEnrollmentFlow() {
     void loadFactors();
   }
 
-  async function removeFactor(id: string) {
+  function promptRemoveFactor(id: string) {
+    setRemovingFactorId(id);
+    setRemoveCode("");
+    setRemoveError(null);
+  }
+
+  async function confirmRemoveFactor() {
+    if (!removingFactorId || removeCode.length !== 6) return;
     setBusy(true);
-    const { error } = await supabase.auth.mfa.unenroll({ factorId: id });
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    setRemoveError(null);
+
+    try {
+      // 1. Elevate session to AAL2 by verifying TOTP code
+      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: removingFactorId,
+      });
+      if (challengeError) {
+        setRemoveError(challengeError.message);
+        setBusy(false);
+        return;
+      }
+
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: removingFactorId,
+        challengeId: challenge.id,
+        code: removeCode,
+      });
+      if (verifyError) {
+        setRemoveError("Código incorrecto. Verifica e intenta de nuevo.");
+        setBusy(false);
+        return;
+      }
+
+      // 2. Now at AAL2 — safe to unenroll
+      const { error } = await supabase.auth.mfa.unenroll({ factorId: removingFactorId });
+      if (error) {
+        setRemoveError(error.message);
+        setBusy(false);
+        return;
+      }
+
+      toast.success("Autenticador removido");
+      setRemovingFactorId(null);
+      setRemoveCode("");
+      void loadFactors();
+    } catch {
+      setRemoveError("Error inesperado. Intenta de nuevo.");
+    } finally {
+      setBusy(false);
     }
-    toast.success("Autenticador removido");
-    void loadFactors();
   }
 
   const verified = factors?.filter((f) => f.status === "verified") ?? [];
@@ -202,32 +245,83 @@ export function MfaEnrollmentFlow() {
       ) : factors === null ? (
         <p className="text-sm text-muted-foreground">Cargando autenticadores...</p>
       ) : verified.length > 0 ? (
-        <ul className="space-y-2">
-          {verified.map((f) => (
-            <li
-              key={f.id}
-              className="flex items-center justify-between rounded-2xl border border-border/60 bg-card px-4 py-3"
-            >
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="h-5 w-5 text-primary" aria-hidden />
-                <div>
-                  <p className="text-sm font-semibold">{f.friendly_name ?? "Autenticador"}</p>
-                  <p className="text-xs text-muted-foreground">Activo</p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeFactor(f.id)}
-                disabled={busy}
-                className="gap-2 text-destructive hover:text-destructive"
+        <div className="space-y-3">
+          <ul className="space-y-2">
+            {verified.map((f) => (
+              <li
+                key={f.id}
+                className="flex items-center justify-between rounded-2xl border border-border/60 bg-card px-4 py-3"
               >
-                <Trash2 className="h-4 w-4" />
-                Quitar
-              </Button>
-            </li>
-          ))}
-        </ul>
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary" aria-hidden />
+                  <div>
+                    <p className="text-sm font-semibold">{f.friendly_name ?? "Autenticador"}</p>
+                    <p className="text-xs text-muted-foreground">Activo</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => promptRemoveFactor(f.id)}
+                  disabled={busy || removingFactorId === f.id}
+                  className="gap-2 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Quitar
+                </Button>
+              </li>
+            ))}
+          </ul>
+
+          {removingFactorId && (
+            <div className="rounded-2xl border border-destructive/30 bg-card p-5 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-destructive">Confirmar eliminación</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Ingresa el código de 6 dígitos de tu app autenticadora para confirmar.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={removeCode}
+                  onChange={(e) => {
+                    setRemoveCode(e.target.value.replace(/\D/g, "").slice(0, 6));
+                    setRemoveError(null);
+                  }}
+                  className="text-center text-2xl font-bold tracking-[0.5em]"
+                  aria-invalid={!!removeError}
+                />
+                {removeError && (
+                  <p role="alert" className="text-sm text-destructive">{removeError}</p>
+                )}
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setRemovingFactorId(null); setRemoveCode(""); setRemoveError(null); }}
+                  disabled={busy}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={confirmRemoveFactor}
+                  disabled={busy || removeCode.length !== 6}
+                >
+                  {busy ? "Verificando..." : "Confirmar y quitar"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
         <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm">
           <ShieldAlert className="mt-0.5 h-5 w-5 text-amber-500" aria-hidden />
