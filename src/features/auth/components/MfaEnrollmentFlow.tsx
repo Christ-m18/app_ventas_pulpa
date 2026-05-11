@@ -41,7 +41,9 @@ export function MfaEnrollmentFlow() {
   const refresh = useCallback(() => {
     supabase.auth.mfa.listFactors().then(({ data, error }) => {
       if (error) {
-        toast.error(error.message);
+        // Silently handle 403/422 — session may be expired or factors in bad state
+        console.warn("MFA listFactors error:", error.message);
+        setFactors([]);
         return;
       }
       setFactors((data?.totp ?? []) as Factor[]);
@@ -53,7 +55,8 @@ export function MfaEnrollmentFlow() {
     supabase.auth.mfa.listFactors().then(({ data, error }) => {
       if (cancelled) return;
       if (error) {
-        toast.error(error.message);
+        console.warn("MFA listFactors error:", error.message);
+        setFactors([]);
         return;
       }
       setFactors((data?.totp ?? []) as Factor[]);
@@ -67,7 +70,11 @@ export function MfaEnrollmentFlow() {
     setBusy(true);
     try {
       // 1. Limpieza automática de factores no verificados para evitar errores 422 y clutter
-      const { data: currentFactors } = await supabase.auth.mfa.listFactors();
+      const { data: currentFactors, error: listError } = await supabase.auth.mfa.listFactors();
+      if (listError) {
+        toast.error("No se pudo verificar el estado de seguridad. Intenta cerrar sesión y volver a entrar.");
+        return;
+      }
       const unverifiedFactors = (currentFactors?.totp as unknown as Factor[] | undefined)?.filter(f => f.status === "unverified") || [];
       
       for (const factor of unverifiedFactors) {
