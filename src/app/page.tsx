@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
 import { getSiteJpegPaths, getSiteMp4Paths } from "@/lib/site-images";
 import { productService } from "@/features/products/services/productService";
+import { getFeaturedProductsWithPopularity } from "@/features/products/services/featuredService";
 import { AtSign, ArrowRight, Leaf, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +28,7 @@ export default async function LandingPage() {
   const mosaic = jpgs.slice(1, 25);
 
   const [featured, categories] = await Promise.all([
-    productService.getFeaturedProducts(),
+    getFeaturedProductsWithPopularity(),
     productService.getCategories(),
   ]);
 

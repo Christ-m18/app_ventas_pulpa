@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { GalleryStrip } from "@/components/home/GalleryStrip";
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProductCard } from "@/features/products/components/ProductCard";
-import { productService } from "@/features/products/services/productService";
+import { getFeaturedProductsWithPopularity } from "@/features/products/services/featuredService";
 import { BRAND } from "@/lib/brand";
 import { getSiteJpegPaths } from "@/lib/site-images";
 import { ArrowRight, Zap, Droplets, Leaf, Sparkles } from "lucide-react";
@@ -11,7 +11,7 @@ import { ArrowRight, Zap, Droplets, Leaf, Sparkles } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function TiendaPage() {
-  const featuredProducts = await productService.getFeaturedProducts();
+  const featuredProducts = await getFeaturedProductsWithPopularity();
   const jpegPaths = getSiteJpegPaths();
   const heroSrc = jpegPaths[0] ?? null;
   const galleryPaths = jpegPaths.slice(1, 25);

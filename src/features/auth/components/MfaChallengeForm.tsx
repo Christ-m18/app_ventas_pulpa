@@ -37,23 +37,43 @@ export function MfaChallengeForm() {
 
   useEffect(() => {
     let cancelled = false;
-    supabase.auth.mfa.listFactors().then(({ data, error }) => {
+
+    async function init() {
+      // Wait for session to be available
+      const { data: { session } } = await supabase.auth.getSession();
       if (cancelled) return;
-      if (error) {
-        setLoadError(error.message);
+
+      if (!session) {
+        // Session not ready yet — listen for auth state change
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, sess) => {
+            if (cancelled) return;
+            if (sess) {
+              subscription.unsubscribe();
+              const { data, error } = await supabase.auth.mfa.listFactors();
+              if (cancelled) return;
+              if (error) { setLoadError(error.message); return; }
+              const verified = data?.totp?.find((f) => f.status === "verified");
+              if (!verified) { setLoadError("No tienes un autenticador TOTP verificado."); return; }
+              setFactorId(verified.id);
+              setFocus("code");
+            }
+          }
+        );
         return;
       }
+
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (cancelled) return;
+      if (error) { setLoadError(error.message); return; }
       const verified = data?.totp?.find((f) => f.status === "verified");
-      if (!verified) {
-        setLoadError("No tienes un autenticador TOTP verificado.");
-        return;
-      }
+      if (!verified) { setLoadError("No tienes un autenticador TOTP verificado."); return; }
       setFactorId(verified.id);
       setFocus("code");
-    });
-    return () => {
-      cancelled = true;
-    };
+    }
+
+    void init();
+    return () => { cancelled = true; };
   }, [setFocus]);
 
   async function onSubmit(values: TotpEnrollInput) {

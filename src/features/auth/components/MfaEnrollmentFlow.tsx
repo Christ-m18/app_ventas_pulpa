@@ -1,8 +1,7 @@
 "use client";
-// Force recompile: 3.0
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -25,6 +24,8 @@ export function MfaEnrollmentFlow() {
   const [factors, setFactors] = useState<Factor[] | null>(null);
   const [enroll, setEnroll] = useState<EnrollState | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sessionError, setSessionError] = useState(false);
+  const mountedRef = useRef(true);
 
   const {
     register,
@@ -38,37 +39,62 @@ export function MfaEnrollmentFlow() {
     defaultValues: { code: "" },
   });
 
-  const refresh = useCallback(() => {
-    supabase.auth.mfa.listFactors().then(({ data, error }) => {
-      if (error) {
-        // Silently handle 403/422 — session may be expired or factors in bad state
-        console.warn("MFA listFactors error:", error.message);
-        setFactors([]);
-        return;
-      }
-      setFactors((data?.totp ?? []) as Factor[]);
-    });
+  const loadFactors = useCallback(async () => {
+    const { data, error } = await supabase.auth.mfa.listFactors();
+    if (!mountedRef.current) return;
+    if (error) {
+      console.warn("MFA listFactors error:", error.message);
+      setFactors([]);
+      return;
+    }
+    setFactors((data?.totp ?? []) as Factor[]);
   }, []);
 
+  // Wait for auth session to be ready before calling MFA methods
   useEffect(() => {
-    let cancelled = false;
-    supabase.auth.mfa.listFactors().then(({ data, error }) => {
-      if (cancelled) return;
-      if (error) {
-        console.warn("MFA listFactors error:", error.message);
-        setFactors([]);
-        return;
+    mountedRef.current = true;
+
+    // First try: the session may already be restored
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mountedRef.current) return;
+      if (session) {
+        void loadFactors();
+      } else {
+        // Session not yet restored — wait for auth state change
+        setSessionError(true);
       }
-      setFactors((data?.totp ?? []) as Factor[]);
     });
+
+    // Listen for auth state changes (session restore, sign-in, sign-out)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!mountedRef.current) return;
+        if (session) {
+          setSessionError(false);
+          void loadFactors();
+        } else if (event === "SIGNED_OUT") {
+          setFactors([]);
+          setSessionError(true);
+        }
+      }
+    );
+
     return () => {
-      cancelled = true;
+      mountedRef.current = false;
+      subscription.unsubscribe();
     };
-  }, []);
+  }, [loadFactors]);
 
   async function startEnrollment() {
     setBusy(true);
     try {
+      // 0. Verify we have an active session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Tu sesión ha expirado. Cierra sesión y vuelve a entrar.");
+        return;
+      }
+
       // 1. Limpieza automática de factores no verificados para evitar errores 422 y clutter
       const { data: currentFactors, error: listError } = await supabase.auth.mfa.listFactors();
       if (listError) {
@@ -112,7 +138,7 @@ export function MfaEnrollmentFlow() {
     setBusy(false);
     setEnroll(null);
     reset();
-    void refresh();
+    void loadFactors();
   }
 
   async function verifyEnrollment(values: TotpEnrollInput) {
@@ -136,7 +162,7 @@ export function MfaEnrollmentFlow() {
     toast.success("Autenticador activado");
     setEnroll(null);
     reset();
-    void refresh();
+    void loadFactors();
   }
 
   async function removeFactor(id: string) {
@@ -148,7 +174,7 @@ export function MfaEnrollmentFlow() {
       return;
     }
     toast.success("Autenticador removido");
-    void refresh();
+    void loadFactors();
   }
 
   const verified = factors?.filter((f) => f.status === "verified") ?? [];
@@ -168,7 +194,12 @@ export function MfaEnrollmentFlow() {
         </div>
       </div>
 
-      {factors === null ? (
+      {sessionError ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+          <ShieldAlert className="mt-0.5 h-5 w-5 text-destructive" aria-hidden />
+          <p>No se pudo cargar la sesión. Intenta recargar la página o cerrar sesión y volver a entrar.</p>
+        </div>
+      ) : factors === null ? (
         <p className="text-sm text-muted-foreground">Cargando autenticadores...</p>
       ) : verified.length > 0 ? (
         <ul className="space-y-2">
