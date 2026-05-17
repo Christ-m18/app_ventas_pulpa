@@ -129,6 +129,7 @@ export function ProductForm({
           >
             <option value="lb">Libra (lb)</option>
             <option value="kg">Kilogramo (kg)</option>
+            <option value="gl">Galón - 128 oz (GL)</option>
             <option value="paquete">Paquete</option>
           </select>
         </div>
