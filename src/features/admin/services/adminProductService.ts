@@ -13,7 +13,7 @@ export type ProductInput = {
   description: string | null;
   price: number;
   stock: number;
-  unit: "lb" | "kg" | "paquete";
+  unit: "lb" | "kg" | "gl" | "paquete";
   image_url: string | null;
   category_id: string | null;
   is_combo: boolean;

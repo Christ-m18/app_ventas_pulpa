@@ -17,7 +17,7 @@ const ProductSchema = z.object({
   description: z.string().max(2000).nullable(),
   price: z.number().positive("El precio debe ser mayor a 0"),
   stock: z.number().int().min(0, "Stock no puede ser negativo"),
-  unit: z.enum(["lb", "kg", "paquete"]),
+  unit: z.enum(["lb", "kg", "gl", "paquete"]),
   image_url: z
     .string()
     .url()

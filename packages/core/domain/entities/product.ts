@@ -20,7 +20,7 @@ export const ProductSchema = z.object({
   description: z.string().nullable(),
   price: z.number().positive('El precio debe ser mayor a 0'),
   stock: z.number().int().min(0, 'El stock no puede ser negativo'),
-  unit: z.enum(['lb', 'kg', 'paquete']),
+  unit: z.enum(['lb', 'kg', 'gl', 'paquete']),
   image_url: z.string().url().nullable(),
   category_id: z.string().uuid().nullable(),
   is_combo: z.boolean().default(false),
