@@ -5,6 +5,7 @@ import { BRAND } from "@/lib/brand";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { ServiceWorkerRegistrar } from "@/components/system/ServiceWorkerRegistrar";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 
@@ -71,6 +72,7 @@ export default function RootLayout({
           </QueryProvider>
           <ServiceWorkerRegistrar />
           <SpeedInsights />
+          <Analytics />
         </div>
       </body>
     </html>
