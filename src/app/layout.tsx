@@ -4,6 +4,7 @@ import "./globals.css";
 import { BRAND } from "@/lib/brand";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ServiceWorkerRegistrar } from "@/components/system/ServiceWorkerRegistrar";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 
@@ -69,6 +70,7 @@ export default function RootLayout({
             <Toaster position="top-center" richColors />
           </QueryProvider>
           <ServiceWorkerRegistrar />
+          <SpeedInsights />
         </div>
       </body>
     </html>
