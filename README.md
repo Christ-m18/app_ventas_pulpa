@@ -33,6 +33,40 @@ Esta es una aplicación completa de comercio electrónico para la venta de pulpa
    - Copia el contenido de `supabase/schema.sql` en el SQL Editor de Supabase.
    - Ejecuta `supabase/seed.sql` para poblar los productos iniciales.
 
+## 🔐 Autenticación Social (Google y Facebook)
+
+Los botones de "Continuar con Google" y "Continuar con Facebook" en las páginas
+`/login` y `/registro` usan el proveedor OAuth nativo de Supabase.
+**No requieren variables de entorno adicionales en `.env.local`.**
+
+### Configurar Google OAuth
+
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials.
+2. Crea un **OAuth 2.0 Client ID** (tipo: Web application).
+3. En "Authorized redirect URIs" agrega:
+   `https://<tu-proyecto>.supabase.co/auth/v1/callback`
+4. Copia el **Client ID** y el **Client Secret**.
+5. En Supabase Dashboard → Authentication → Providers → Google:
+   - Pega el Client ID y Client Secret.
+   - Activa el proveedor y guarda.
+
+### Configurar Facebook OAuth
+
+1. Ve a [Meta for Developers](https://developers.facebook.com/) → My Apps → Create App.
+2. Agrega el producto **Facebook Login**.
+3. En Settings → Basic, copia el **App ID** y el **App Secret**.
+4. En Facebook Login → Settings agrega el Redirect URI:
+   `https://<tu-proyecto>.supabase.co/auth/v1/callback`
+5. En Supabase Dashboard → Authentication → Providers → Facebook:
+   - Pega el App ID y App Secret.
+   - Activa el proveedor y guarda.
+
+### ¿Por qué no Instagram?
+
+La Instagram Basic Display API fue **deprecada por Meta en diciembre 2024** y ya no
+acepta nuevas integraciones. No existe un flujo OAuth standalone para Instagram compatible
+con Supabase. "Login con Facebook" cubre el ecosistema Meta de forma oficial.
+
 ## 🏃 Cómo ejecutar
 
 ### Con Docker (Recomendado)

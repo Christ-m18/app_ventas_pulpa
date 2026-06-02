@@ -44,3 +44,14 @@ export const totpEnrollSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type TotpEnrollInput = z.infer<typeof totpEnrollSchema>;
+
+export const completeProfileSchema = z.object({
+  phone: z
+    .string()
+    .trim()
+    .min(10, { error: "Teléfono debe tener al menos 10 dígitos." })
+    .max(20, { error: "Teléfono demasiado largo." })
+    .regex(/^[\d\s\-+()]+$/, { error: "Formato inválido." }),
+});
+
+export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
