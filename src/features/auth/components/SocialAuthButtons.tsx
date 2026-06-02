@@ -39,6 +39,7 @@ export function SocialAuthButtons() {
         size="lg"
         onClick={() => handleSocialLogin("google")}
         disabled={loading !== null}
+        aria-busy={loading === "google"}
         aria-label="Continuar con Google"
       >
         <GoogleIcon />
@@ -52,6 +53,7 @@ export function SocialAuthButtons() {
         size="lg"
         onClick={() => handleSocialLogin("facebook")}
         disabled={loading !== null}
+        aria-busy={loading === "facebook"}
         aria-label="Continuar con Facebook"
       >
         <FacebookIcon />
