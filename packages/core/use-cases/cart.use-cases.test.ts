@@ -109,11 +109,14 @@ describe('Cart Use Cases', () => {
     });
 
     it('should calculate total correctly', () => {
+      const p1 = { ...mockProduct, price: 1500 };
+      const p2 = { ...mockProduct2, price: 1800 };
       const items: CartItem[] = [
-        { product: mockProduct, quantity: 2 },  // 150 * 2 = 300
-        { product: mockProduct2, quantity: 3 }, // 180 * 3 = 540
+        { product: p1, quantity: 2 }, // 1500 * 2 = 3000
+        { product: p2, quantity: 3 }, // 1800 * 3 = 5400
       ];
-      expect(calculateCartTotal(items)).toBe(798); // 840 - 5% discount (count = 5)
+      // subtotal 8400 >= 5000 → 5% discount → 8400 * 0.95 = 7980
+      expect(calculateCartTotal(items)).toBe(7980);
     });
   });
 
